@@ -2,6 +2,8 @@ source 'https://rubygems.org'
 
 # for authenticating users
 gem 'devise'
+# for Sendgrid password and username security
+gem 'figaro', '1.0'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.2.4'
 
@@ -13,6 +15,9 @@ end
 group :development do
   gem 'sqlite3'
 end
+
+# Bootstrap
+gem 'bootstrap-sass'
 
 gem 'puma'
 # Use SCSS for stylesheets

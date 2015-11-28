@@ -1,12 +1,17 @@
 Rails.application.routes.draw do
+  get 'welcome/index'
+
+  get 'welcome/about'
+
   resources :lists
-  resources :users
 
   devise_for :users
 
-  get 'about' => 'welcome#about'
+  # get 'about' => 'welcome#about'
+  #
+  root to: 'welcome#index'
+  # root to: "application#hello"
 
-  root to: "application#hello"
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
