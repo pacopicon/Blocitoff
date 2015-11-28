@@ -17,9 +17,23 @@ Steps to making a Ruby on Rails App
       +      config.action_mailer.delivery_method = :smtp
       +      config.action_mailer.perform_deliveries = true
              ```
-      4 - Create roote path, in config/routes.rb: ```+ root to: => "welcome#index"```
-      5 - On Terminal: rails g devise:views // rails g devise User
-      7 - In db/migrate/[timestamp]_ devise_create_users.rb:
+      4 - In config/environments/production.rb:
+              ```
+            ...
+            #http://app_name.herokuapp.com
+      +     config.action_mailer.default_url_options = {host: 'app_name.herokuapp.com'}
+              ```
+      5 - Unrelated but make app encrypt transactions while on config/environments/production.rb:
+      ```
+            ...
+            # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
+      -     # config.force_ssl = true
+      +     config.force_ssl = true
+      ```
+      6 - on config/initializers/devise.rb, change ```config.mailer_sender``` to reflect the email of your choice.
+      7 - Create root path, in config/routes.rb: ```+ root to: => "welcome#index"```
+      8 - On Terminal: rails g devise:views // rails g devise User
+      9 - In db/migrate/[timestamp]_ devise_create_users.rb:
              ```
              class DeviseCreateUsers < ActiveRecord::Migration
                 def change
@@ -31,8 +45,8 @@ Steps to making a Ruby on Rails App
                 end
               end
              ```
-      8 - uncomment all four lines under ## Confirmable
-      9 - Allow the new param "name" to be entered into the database, in app/controllers/application_controller.rb:
+      10 - uncomment all four lines under ## Confirmable
+      11 - Allow the new param "name" to be entered into the database, in app/controllers/application_controller.rb:
       ```
               class ApplicationController < ActionController::Base
                 protect_from_forgery with: :exception
@@ -45,8 +59,8 @@ Steps to making a Ruby on Rails App
       +         end
               end
       ```      
-      9 - On Terminal: rake db:migrate
-      10 - In app/models/user.rb: add ```:confirmable``` to list of devise "modules" (to the right of ```:validatable```)
+      12 - On Terminal: rake db:migrate
+      13 - In app/models/user.rb: add ```:confirmable``` to list of devise "modules" (to the right of ```:validatable```)
 
 (III) - User Story - sign up w/ user name, password & email (Heroku & sendgrid)
       1 - On Gemfile:
@@ -105,7 +119,7 @@ Steps to making a Ruby on Rails App
       16 - Create config/initializers/setup_mail.rb
       17 - In config/initializers/setup_mail.rb:
       ```
-      +    if Rails.env.development?
+      +    if Rails.env.development? || Rails.env.production?
       +       ActionMailer::Base.delivery_method = :smtp
       +       ActionMailer::Base.smtp_settings = {
       +         address:        'smtp.sendgrid.net',
@@ -166,7 +180,7 @@ Steps to making a Ruby on Rails App
 
       +         <div class="pull-right user-info">
       +           <%= if current_user %>
-      +             Hello <%= current_user.email %>! <%= link_to "Sign out", destroy_user_session_path, method: :delete %>
+      +             Hello <%= link_to (current_user.name || current_user.email), edit_user_registration_path %>! <%= link_to "Sign out", destroy_user_session_path, method: :delete %>
       +           <% else %>
       +           <%= link_to "Sign In", new_user_session_path %> or
       +           <%= link_to "Sign Up", new_user_registration_path %>
@@ -258,7 +272,13 @@ Steps to making a Ruby on Rails App
       +         <p>Blocitoff will make you more organized, punctual, responsible, and ethical.</p>
       +       </div>
       +     </div>
-(VII) - Testing User sign_up, sign_in, sign_out
+(VII) -
+
+
+
+
+
+- Testing User sign_up, sign_in, sign_out
       1 - In Gemfile:
       ```
             group :development, :test do
