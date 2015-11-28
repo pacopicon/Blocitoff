@@ -32,6 +32,19 @@ Steps to making a Ruby on Rails App
               end
              ```
       8 - uncomment all four lines under ## Confirmable
+      9 - Allow the new param "name" to be entered into the database, in app/controllers/application_controller.rb:
+      ```
+              class ApplicationController < ActionController::Base
+                protect_from_forgery with: :exception
+      +         before_action :configure_permitted_parameters, if: :devise_controller?
+      +   
+      +         protected
+      +   
+      +         def configure_permitted_parameters
+      +           devise_parameter_sanitizer.for(:sign_up) << :name
+      +         end
+              end
+      ```      
       9 - On Terminal: rake db:migrate
       10 - In app/models/user.rb: add ```:confirmable``` to list of devise "modules" (to the right of ```:validatable```)
 
@@ -220,4 +233,40 @@ Steps to making a Ruby on Rails App
               </div>
             </div>
       ```
-      3 -
+      3 - Update html and links in welcome/index/html.erb:
+      +     <br>
+      +     <div class="jumbotron">
+      +       <h1>Blocitoff</h1>
+      +       <p>Organize with Blocitoff.</p>
+      +       <p>
+      +           <%= link_to "Sign In", new_user_session_path, class: 'btn +btn-primary' %> or
+      +           <%= link_to "Sign Up", new_user_registration_path, class: 'btn btn-primary' %> today!
+      +       </p>
+      +     </div>
+      +
+      +     <div class="row">
+      +       <div class="col-md-4">
+      +         <h2>The New To-Do list, by Blocitoff</h2>
+      +         <p>Create self-prioritizing, self-deleting To-Do lists.</p>
+      +       </div>
+      +       <div class="col-md-4">
+      +         <h2>Eliminates clutter</h2>
+      +         <p>Blocitoff will be the last organizer you need.</p>
+      +       </div>
+      +       <div class="col-md-4">
+      +         <h2>Organizes your life</h2>
+      +         <p>Blocitoff will make you more organized, punctual, responsible, and ethical.</p>
+      +       </div>
+      +     </div>
+(VII) - Testing User sign_up, sign_in, sign_out
+      1 - In Gemfile:
+      ```
+            group :development, :test do
+              # Call 'byebug' anywhere in the code to stop execution and get a debugger console
+              gem 'byebug'
+      +       gem 'rspec-rails', '~> 3.0'
+            end
+      ```
+      2 - On Terminal: Bundle
+      3 - On Terminal: rails g rspec:install
+      4 - Set up a separate test database, on Terminal: rake db:test:prepare (Warning: according to Bloc, this command has been deprecated in the newest versions of Rails)
