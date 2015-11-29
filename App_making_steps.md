@@ -17,9 +17,23 @@ Steps to making a Ruby on Rails App
       +      config.action_mailer.delivery_method = :smtp
       +      config.action_mailer.perform_deliveries = true
              ```
-      4 - Create roote path, in config/routes.rb: ```+ root to: => "welcome#index"```
-      5 - On Terminal: rails g devise:views // rails g devise User
-      7 - In db/migrate/[timestamp]_ devise_create_users.rb:
+      4 - In config/environments/production.rb:
+              ```
+            ...
+            #http://app_name.herokuapp.com
+      +     config.action_mailer.default_url_options = {host: 'app_name.herokuapp.com'}
+              ```
+      5 - Unrelated but make app encrypt transactions while on config/environments/production.rb:
+      ```
+            ...
+            # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
+      -     # config.force_ssl = true
+      +     config.force_ssl = true
+      ```
+      6 - on config/initializers/devise.rb, change ```config.mailer_sender``` to reflect the email of your choice.
+      7 - Create root path, in config/routes.rb: ```+ root to: => "welcome#index"```
+      8 - On Terminal: rails g devise:views // rails g devise User
+      9 - In db/migrate/[timestamp]_ devise_create_users.rb:
              ```
              class DeviseCreateUsers < ActiveRecord::Migration
                 def change
@@ -31,8 +45,8 @@ Steps to making a Ruby on Rails App
                 end
               end
              ```
-      8 - uncomment all four lines under ## Confirmable
-      9 - Allow the new param "name" to be entered into the database, in app/controllers/application_controller.rb:
+      10 - uncomment all four lines under ## Confirmable
+      11 - Allow the new param "name" to be entered into the database, in app/controllers/application_controller.rb:
       ```
               class ApplicationController < ActionController::Base
                 protect_from_forgery with: :exception
@@ -45,8 +59,8 @@ Steps to making a Ruby on Rails App
       +         end
               end
       ```      
-      9 - On Terminal: rake db:migrate
-      10 - In app/models/user.rb: add ```:confirmable``` to list of devise "modules" (to the right of ```:validatable```)
+      12 - On Terminal: rake db:migrate
+      13 - In app/models/user.rb: add ```:confirmable``` to list of devise "modules" (to the right of ```:validatable```)
 
 (III) - User Story - sign up w/ user name, password & email (Heroku & sendgrid)
       1 - On Gemfile:
@@ -105,7 +119,7 @@ Steps to making a Ruby on Rails App
       16 - Create config/initializers/setup_mail.rb
       17 - In config/initializers/setup_mail.rb:
       ```
-      +    if Rails.env.development?
+      +    if Rails.env.development? || Rails.env.production?
       +       ActionMailer::Base.delivery_method = :smtp
       +       ActionMailer::Base.smtp_settings = {
       +         address:        'smtp.sendgrid.net',
@@ -166,7 +180,7 @@ Steps to making a Ruby on Rails App
 
       +         <div class="pull-right user-info">
       +           <%= if current_user %>
-      +             Hello <%= current_user.email %>! <%= link_to "Sign out", destroy_user_session_path, method: :delete %>
+      +             Hello <%= link_to (current_user.name || current_user.email), edit_user_registration_path %>! <%= link_to "Sign out", destroy_user_session_path, method: :delete %>
       +           <% else %>
       +           <%= link_to "Sign In", new_user_session_path %> or
       +           <%= link_to "Sign Up", new_user_registration_path %>
@@ -186,7 +200,7 @@ Steps to making a Ruby on Rails App
       8 - restart rails server
       9 - Sign up, check e-mail, confirm account
       10 -
-(VI) - Styling User Views
+(VI) - Styling and Optimizing User Views
       1 - in app/assets/stylesheets/application.scss:
       ```
             @import "bootstrap";
@@ -234,6 +248,7 @@ Steps to making a Ruby on Rails App
             </div>
       ```
       3 - Update html and links in welcome/index/html.erb:
+      ```
       +     <br>
       +     <div class="jumbotron">
       +       <h1>Blocitoff</h1>
@@ -258,7 +273,362 @@ Steps to making a Ruby on Rails App
       +         <p>Blocitoff will make you more organized, punctual, responsible, and ethical.</p>
       +       </div>
       +     </div>
-(VII) - Testing User sign_up, sign_in, sign_out
+      ```
+      4 - Generate users_controller to add more user functionality, on Terminal: rails g controller users show update
+
+      5 - In app/controllers/users_controller.rb add all of the following:
+      ```
+            class UsersController < ApplicationController
+      +       before_action :authenticate_user!, except: [:show]
+
+              def show
+              end
+
+              def update
+      +         if current_user.update_attributes(user_params)
+      +           flash[:notice] = "User information updated"
+      +           redirect_to edit_user_registration_path
+      +         else
+      +           flash[:error] = "Invalid user information"
+      +           redirect_to edit_user_registration_path
+      +         end
+              end
+
+      +       private
+
+      +       def user_params
+      +         params.require(:user).permit(:name)
+      +       end
+            end
+      ```
+
+      6 - Replace existing app/views/devise/registrations/edit.html.erb with:
+      ```
+            <h2>Edit <%= resource_name.to_s.humanize %></h2>
+
+            <div class="row">
+              <div class="col-md-8">
+                <h3>Change email or password</h3>
+                <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :patch }) do |f| %>
+                  <%= devise_error_messages! %>
+                  <div class="form-group">
+                    <%= f.label :email %>
+                    <%= f.email_field :email, class: 'form-control', placeholder: "Enter email" %>
+                  </div>
+                  <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
+                    <div class="form-group">
+                      <p>Waiting confirmation for:</p>
+                      <%= resource.unconfirmed_email %>
+                    </div>
+                  <% end %>
+                  <div class="form-group">
+                    <%= f.label :password %>
+                    <%= f.password_field :password, class: 'form-control', placeholder: "Enter password" %>
+                    <i>(leave blank if you don't want to change it)</i>
+                  </div>
+                  <div class="form-group">
+                    <%= f.label :password_confirmation %>
+                    <%= f.password_field :password_confirmation, class: 'form-control', placeholder: "Enter password confirmation" %>
+                  </div>
+                  <div class="form-group">
+                    <%= f.password_field :current_password, class: 'form-control', placeholder: "Enter password" %>
+                    <i>(we need your current password to confirm your changes)</i>
+                  </div>
+                  <div class="form-group">
+                    <%= f.submit "Update", class: 'btn btn-success' %>
+                  </div>
+                <% end %>
+
+                <h3>Edit personal information</h3>
+                <%= form_for(current_user) do |f| %>
+                  <div class="form-group">
+                    <%= f.label :name %>
+                    <%= f.text_field :name, class: 'form-control', placeholder: "Enter name", autofocus: true %>
+                  </div>
+                  <div class="form-group">
+                    <%= f.submit "Update", class: 'btn btn-success' %>
+                  </div>
+                <% end %>
+
+                <h3>Cancel my account</h3>
+                <div class="form-group">
+                    <p><%= button_to "Cancel my account", registration_path(resource_name), data: { confirm: "Are you sure?" }, method: :delete, class: 'btn btn-danger' %></p>
+                </div>
+              </div>
+            </div>
+      ```
+      7 - To make the above work, modify routes in config/routes.rb:
+      ```
+            devise_for :users
+      +     resources :users, only: [:update]
+      ```
+(VII) - Creating User Profile
+      1 - On Terminal: mkdir app/views/users
+      2 - On Terminal: touch app/views/users/show.html.erb
+      3 - Insert appropriate HTML and Ruby into app/views/users/show.html.erb
+      4 - Update variables in UsersController used by users#show (specifically @user)
+      5 - Add avatar functionality to user#show, on Terminal: brew update
+      6 - On Terminal: brew install imagemagick (if Terminal warns that it has already been installed, then, on Terminal: brew unlink imagemagick, and install again )
+      7 - In Gemfile:
+      ```
+      +     gem 'carrierwave'
+      +     gem 'mini_magick'
+      ```
+      8 - On Terminal: bundle
+      9 - rails generate uploader avatar
+      10 - Add avatar to ```users``` table, on Terminal: rails g migration AddAvatarToUsers avatar:string
+      11 - On Terminal: rake db:migration
+      12 - Modify the User model, in app/models/user.rb:
+      ```
+            has_many :posts # for example  
+      +     mount_uploader :avatar, AvatarUploader      
+      ```
+      13 - Modify the UsersController, in app/controllers/users_controller:
+      ```
+            def user_params
+      -       params.require(:user).permit(:name)
+      +       params.require(:user).permit(:name, :avatar)
+      ```
+      14 - Modify avatar_uploader, in app/uploaders/avatar_uploader.rb:
+      ```
+            # encoding: utf-8
+
+            class AvatarUploader < CarrierWave::Uploader::Base
+
+              # Include RMagick or MiniMagick support:
+              # include CarrierWave::RMagick
+      -       # include CarrierWave::MiniMagick
+      +       include CarrierWave::MiniMagick
+
+              # Choose what kind of storage to use for this uploader:
+      -       storage :file
+      -       # storage :fog
+      +       storage :fog
+
+              # Override the directory where uploaded files will be stored.
+              # This is a sensible default for uploaders that are meant to be mounted:
+              def store_dir
+                "uploads/#{model.class.to_s.underscore}/#{mounted_as}/#{model.id}"
+              end
+
+              # Provide a default URL as a default if there hasn't been a file uploaded:
+              # def default_url
+              #   # For Rails 3.1+ asset pipeline compatibility:
+              #   # ActionController::Base.helpers.asset_path("fallback/" + [version_name, "default.png"].compact.join('_'))
+              #
+              #   "/images/fallback/" + [version_name, "default.png"].compact.join('_')
+              # end
+
+              # Process files as they are uploaded:
+      -       # process :resize_to_fill => [200, 300]
+      +       process :resize_to_fill => [200, 300]
+      -       #
+      -       # def scale(width, height)
+      -       #   # do something
+      -       # end
+
+              # Create different versions of your uploaded files:
+      -       # version :thumb do
+      -       #   process :resize_to_fit => [50, 50]
+      -       # end
+      +       version :tiny do
+      +         process resize_to_fill: [20, 20]
+      +       end
+      +     
+      +       version :small do
+      +         process resize_to_fill: [30, 30]
+      +       end
+      +     
+      +       version :profile do
+      +         process resize_to_fill: [45, 45]
+      +       end
+
+              # Add a white list of extensions which are allowed to be uploaded.
+              # For images you might use something like this:
+      -       # def extension_white_list
+      -       #   %w(jpg jpeg gif png)
+      -       # end
+      +       def extension_white_list
+      +         %w(jpg jpeg gif png)
+      +       end
+
+              # Override the filename of the uploaded files:
+              # Avoid using model.id or version_name here, see uploader/store.rb for details.
+              # def filename
+              #   "something.jpg" if original_filename
+              # end
+
+            end
+      ```
+      15 - Using Amazon's S3 and Fog, in Gemfile: ```+ gem 'fog'```
+      16 - On Terminal: bundle
+      17 - touch config/initializers/fog.rb
+      18 - In config/initializers/fog.rb, add the following:
+       ```
+            CarrierWave.configure do |config|
+              config.fog_credentials = {
+                provider:               'AWS',
+                aws_access_key_id:      ENV['AWS_ACCESS_KEY_ID'],
+                aws_secret_access_key:  ENV['AWS_SECRET_ACCESS_KEY']
+              }
+              config.fog_directory    = ENV['AWS_BUCKET']
+              config.fog_public       = true
+            end
+
+            # Ref:
+            # https://support.cloud.engineyard.com/entries/20996881-Use-CarrierWave-and-Optionally-Fog-to-Upload-and-Store-Files#update3
+            # http://stackoverflow.com/questions/7946819/carrierwave-and-amazon-s3
+       ```
+      19 - Go to Amazon Web Services:            https://us-west-2.console.aws.amazon.com/console/home?nc2=h_m_mc&region=us-west-2#
+      20 - Click on 'S3', then 'Create Bucket'
+      21 - Create 'app_name-development' and 'app_name-production' (DO NOT CAPITALIZE!, NO UNDERSCORES!, NO ENDING DASHES, NO DASHES NEXT TO A PERIOD)
+      22 - Click on user_name, from the drop-down list, select Security Credentials.  Transfer AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY_ID, AWS_BUCKET for development and production to application.yml:
+      ```
+            AWS_ACCESS_KEY_ID: your credential here
+            AWS_SECRET_ACCESS_KEY: your credential here
+            development:
+              AWS_BUCKET: your credential here
+            production:
+              AWS_BUCKET: your credential here
+       ```
+      23 - Modify registrations#edit, on app/views/devise/registrations/edit.html.erb:
+      ```
+            <%= form_for(current_user) do |f| %>
+              <div class="form-group">
+                <%= f.label :name %>
+                <%= f.text_field :name, class: 'form-control', placeholder: "Enter name", autofocus: true %>
+              </div>
+      +       <% if current_user.avatar? %>
+      +         <div class="form-group">
+      +           <p>Current avatar</p>
+      +           <%= image_tag( current_user.avatar.profile.url ) %>
+      +         </div>
+      +       <% end %>
+      +       <div class="form-group">
+      +         <%= f.label :avatar %>
+      +         <%= f.file_field :avatar %>
+      +         <%= f.hidden_field :avatar_cache %>
+      +       </div>
+      +       <div class="form-group">
+      +         <%= f.submit "Update", class: 'btn btn-success' %>
+      +       </div>
+      +     <% end %>
+       ```
+      24 - Modify Application layout, in app/views/layouts/application.html.erb:
+      ```
+            <div class="pull-right user-info">
+              <% if current_user %>
+      +       <%= image_tag(current_user.avatar.tiny.url) if    current_user.avatar? %>
+              Hello <%= link_to (current_user.name || current_user.email), edit_user_registration_path %>! <%= link_to "Sign out", destroy_user_session_path, method: :delete %>
+      ```
+      25 - Modify ApplicationController so as to have app redirect to a specific page after successful Sign In, in app/controllers/application_controller.rb:
+      ```
+      +     def after_sign_in_path_for(resource)
+      +       @user
+      +     end
+
+      ```
+      26 - Modify ApplicationController so as to have app redirect to root page after successful Sign Out, in app/controllers/application_controller.rb:
+      ```
+      +     def after_sign_out_path_for(resource_or_scope)
+      +       root_path
+      +     end
+
+      ```
+      27 - Modify Application layout to create link to User profile (i.e. <% if current_user %><%= link_to (current_user.name || current_user.email)+"'s profile", @user %><% end %>)
+      28 - Go through Heroku-preparation steps to optimize app for production, on Terminal: figaro heroku:set -e production
+      29 - On Terminal: git push heroku master (make sure you are on master)
+      30 - On Terminal: heroku run rake db:migrate
+      31 - On Terminal: heroku restart
+
+(VIII) - Creating User-paraphernalia (To-do lists, posts, etc.)
+      1 - Create model, on Terminal: rails g model Item name:string user:references
+      2 - Associate Users and Items in their models (has_many :items, belongs_to :user)
+      3 - Create Items_controller, on Terminal: rails g controller Items create
+      4 - In config/routes.rb, nest item resources underneath user resources:
+      ```
+      -     resources :users, only: [:update, :show]
+      +     resources :users, only: [:update, :show] do
+      +       resources :items, only: [:create]
+      +     end
+      ```
+      5 - Stub out actions in ItemsController:
+      ```
+            class ItemsController < ApplicationController
+              def create
+      +         @items = Item.new(item_params)
+      +         if @item save
+      +           flash[:notice] = "Succes! Item was saved!"
+      +           redirect_to @item
+      +         else
+      +           flash[:error] = "Oops! Something went wrong. The item was not saved. Please try again!"
+      +           redirect_to @user
+      +         end
+      +       end
+      +
+      +       # def index
+      +       #   @items = Item.all
+      +       # end
+      +
+      +       # def show
+      +       #   @item = Item.find(params[:id])
+      +       # end
+      +
+      +       # def newest
+      +       #   @item = Item.new
+      +       # end
+      +
+      +       private
+      +
+      +       def item_params
+      +         params.require(:item).permit(:name)
+      +       end
+      +
+            end
+      ```
+      6 - Create item partial for entering items, on Terminal: touch app/views/items/_ form.html.erb.
+      7 - in app/views/items/_ form.html.erb, add the following:
+      ```
+      <h1>New Item</h1>
+
+       <div class="row">
+         <div class="col-md-4">
+           <%= form_for [@user, Item.new] do |f| %>
+             <div class="form-group">
+               <%= f.label :name %>
+               <%= f.text_field :name, class: 'form-control', placeholder: "Enter item that needs to be done" %>
+             </div>
+             <div class="form-group">
+               <%= f.submit "Save", class: 'btn btn-success' %>
+             </div>
+           <% end %>
+         </div>
+       </div>
+      ```
+      8 - Create item partial for displaying items, on Terminal: touch app/views/items/_ item.html.erb.
+      9 - in app/views/items/_ item.html.erb, add the following:
+      
+      10 - Add render syntax for the _ form and _ item partials (and items.count) in user#show:
+      ```
+                  <div class="media-body">
+                    <h2 class="media-heading"><%= @user.name %></h2>
+      +             <h3><%= pluralize(@user.items.count, 'item')%></h3>
+                    <small>
+                      <ol>
+      +                 <li><%= render partial: 'items/form', collection: @items %></li>
+                      </ol>
+                      </small>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+      ```
+      9 - Make sure to update migrations, on Terminal: rake db:migrate
+
+
+
+- Testing User sign_up, sign_in, sign_out
       1 - In Gemfile:
       ```
             group :development, :test do
@@ -270,3 +640,96 @@ Steps to making a Ruby on Rails App
       2 - On Terminal: Bundle
       3 - On Terminal: rails g rspec:install
       4 - Set up a separate test database, on Terminal: rake db:test:prepare (Warning: according to Bloc, this command has been deprecated in the newest versions of Rails)
+      5 - Create TestFactories module, on Terminal: mkdir spec/support
+      6 - On Terminal: touch spec/support/test_factories.rb
+      7 - In spec/support/test_factories.rb, add the following:
+      ```
+            module TestFactories
+
+              def associated_post(options={})
+                post_options = {
+                  title:  'Post title',
+                  body:   'Post bodies must be pretty long.',
+                  topic:  Topic.create(name: 'Topic name'),
+                  user:   authenticated_user
+                }.merge(options)
+                Post.create(post_options)
+              end
+
+              def authenticated_user(options={})
+                user_options = {email: "email#{rand}@fake.com", password: 'password'}.merge(options)
+                user = User.new(user_options)
+                user.skip_confirmation!
+                user.save
+                user
+              end
+            end
+
+      ```
+      8 - Make The above file 'requireable', in spec/support/test_factories.rb:
+      ```
+      -     # Dir[Rails.root.join('spec/support/**/*.rb')].each { |f| require f }
+      +     Dir[Rails.root.join('spec/support/**/*.rb')].each { |f| require f }
+      ```
+      9 - In Gemfile: ```+ gem 'capybara'```
+      10 - On Terminal: bundle
+      11 - Makes sure to have something in app/views/users/show.html.erb
+      12 - References in show.html.erb to @user should be backed up in UsersController:
+      ```
+            def show
+      +       @user = User.find(params[:id])
+            end
+      ```
+      13 -
+
+
+
+      - Install FactoryGirl.  On Gemfile: ```+ gem 'factory_girl_rails'
+      , '~> 4.0'```
+      - On Terminal: bundle
+      - Make FactoryGirl available in specs.  In spec/rails_helper.rb:
+      ```
+      +     # Make Factory Girl's methods available
+      +     config.include FactoryGirl::Syntax::Methods
+      ```
+      - On Terminal: mkdir spec/factories
+      - On Terminal: touch spec/factories/user.rb
+      - In spec/factories/user.rb, add all of the following:
+      ```
+            FactoryGirl.define do
+              factory :user do
+                name "Douglas Adams"
+                sequence(:email, 100) { |n| "person#{n}@example.com" }
+                password "helloworld"
+                password_confirmation "helloworld"
+                confirmed_at Time.now
+              end
+            end
+      ```
+      - On Terminal: mkdir spec/features
+      - On Terminal: touch spec/features/profiles_spec.rb
+      ```
+
+
+      - For Spec'cing profiles, lookt at Checkpoint 54 "TDDing the Resource Basics", in spec/features/profiles_spec.rb, add the following:
+      ```
+            require 'rails_helper'
+
+            describe "Visiting profiles" do
+
+              include TestFactories
+
+              before do
+                @user = authenticated_user
+              end
+
+              describe "not signed in" do
+
+                it "shows profile" do
+                  visit user_path(@user)
+                  expect(current_path).to eq(user_path(@user))
+                end
+
+              end
+            end
+      ```

@@ -1,0 +1,3 @@
+<%= content_tag :div, class: 'media', id: "item-#{item.id}" do %>
+<small><%= item.name %> (created <%= time_ago_in_words(item.created_at) %> ago) <%= link_to "Delete", [item.user, item], method: :delete, remote: true %></small>
+<% end %>

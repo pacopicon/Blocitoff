@@ -1,0 +1,25 @@
+<div class="row">
+  <div class="col-md-12">
+    <div class="media">
+      <% if @user.avatar? %>
+        <div class="media-left">
+          <%= image_tag @user.avatar.url, class: 'media-object' %>
+        </div>
+      <% end %>
+      <div class="media-body">
+        <h2 class="media-heading"><%= @user.name %>:</h2>
+        <div class='js-items-count'><%= pluralize(@user.items.count, 'item')%> to complete</div>
+        <small>
+          <ol>
+            <li class="js-items">
+              <%= render partial: 'items/item', collection: @items %>
+            </li>
+          </ol>
+        <div class="new-item">
+          <%= render partial: 'items/form', locals: {item: @item, comment: @user.items.new}%>
+        </div>
+        </small>
+      </div>
+    </div>
+  </div>
+</div>
