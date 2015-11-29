@@ -607,6 +607,7 @@ Steps to making a Ruby on Rails App
       ```
       8 - Create item partial for displaying items, on Terminal: touch app/views/items/_ item.html.erb.
       9 - in app/views/items/_ item.html.erb, add the following:
+      
       10 - Add render syntax for the _ form and _ item partials (and items.count) in user#show:
       ```
                   <div class="media-body">

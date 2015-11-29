@@ -1,4 +1,21 @@
 class ItemsController < ApplicationController
+
+  def destroy
+    @user = User.find(params[:user_id])
+    @item = @user.items.find(params[:id])
+
+    if @item.destroy
+      flash[:notice] = "The item was obliterated!"
+    else
+      flash[:notice] = "Oops!, the item could not be deleted.  Try again!"
+    end
+
+  respond_to do |format|
+    format.html
+    format.js
+  end
+end
+
   def create
     @user = User.find(params[:user_id])
     @items = @user.items
@@ -18,18 +35,6 @@ class ItemsController < ApplicationController
       format.js
     end
   end
-
-  # def index
-  #   @items = Item.all
-  # end
-
-  # def show
-  #   @item = Item.find(params[:id])
-  # end
-
-  # def newest
-  #   @item = Item.new
-  # end
 
   private
 

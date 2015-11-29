@@ -8,10 +8,12 @@
       <% end %>
       <div class="media-body">
         <h2 class="media-heading"><%= @user.name %>:</h2>
-        <h4><%= pluralize(@user.items.count, 'item')%> to complete</h4>
+        <div class='js-items-count'><%= pluralize(@user.items.count, 'item')%> to complete</div>
         <small>
           <ol>
-            <li class="js-items"><%= render partial: 'items/item', collection: @items %></li>
+            <li class="js-items">
+              <%= render partial: 'items/item', collection: @items %>
+            </li>
           </ol>
         <div class="new-item">
           <%= render partial: 'items/form', locals: {item: @item, comment: @user.items.new}%>
