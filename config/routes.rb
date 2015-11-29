@@ -1,11 +1,14 @@
 Rails.application.routes.draw do
+  get 'items/create'
+
   root to: 'welcome#index'
   get 'about' => 'welcome#about'
-  
+
   devise_for :users # Order of routes matters (put this one before resources: users)
 
-  resources :lists
-  resources :users, only: [:update, :show]
+  resources :users, only: [:update, :show] do
+    resources :items, only: [:create]
+  end
 
 
 

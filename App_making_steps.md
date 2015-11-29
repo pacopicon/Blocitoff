@@ -274,7 +274,7 @@ Steps to making a Ruby on Rails App
       +       </div>
       +     </div>
       ```
-      4 - Generate users_controller to add more user functionality, on Terminal: rails g generate users_controller show update
+      4 - Generate users_controller to add more user functionality, on Terminal: rails g controller users show update
 
       5 - In app/controllers/users_controller.rb add all of the following:
       ```
@@ -521,19 +521,109 @@ Steps to making a Ruby on Rails App
       +       <%= image_tag(current_user.avatar.tiny.url) if    current_user.avatar? %>
               Hello <%= link_to (current_user.name || current_user.email), edit_user_registration_path %>! <%= link_to "Sign out", destroy_user_session_path, method: :delete %>
       ```
-      25 - Modify ApplicationController so as to have app redirect to a specific page after successful Sign in, in app/controllers/application_controller.rb:
+      25 - Modify ApplicationController so as to have app redirect to a specific page after successful Sign In, in app/controllers/application_controller.rb:
       ```
+      +     def after_sign_in_path_for(resource)
+      +       @user
+      +     end
 
       ```
-      26 - Go through Heroku-preparation steps to optimize app for production, on Terminal: figaro heroku:set -e production
-      27 - On Terminal: git push heroku master (make sure you are on master)
-      28 - On Terminal: heroku run rake db:migrate
-      29 - On Terminal: heroku restart
+      26 - Modify ApplicationController so as to have app redirect to root page after successful Sign Out, in app/controllers/application_controller.rb:
+      ```
+      +     def after_sign_out_path_for(resource_or_scope)
+      +       root_path
+      +     end
 
-scrap:
+      ```
+      27 - Modify Application layout to create link to User profile (i.e. <% if current_user %><%= link_to (current_user.name || current_user.email)+"'s profile", @user %><% end %>)
+      28 - Go through Heroku-preparation steps to optimize app for production, on Terminal: figaro heroku:set -e production
+      29 - On Terminal: git push heroku master (make sure you are on master)
+      30 - On Terminal: heroku run rake db:migrate
+      31 - On Terminal: heroku restart
 
-<!-- <%= pluralize(@user.posts.count, 'post') %>, -->
-<!-- <%= pluralize(@user.comments.count, 'comment') %> -->
+(VIII) - Creating User-paraphernalia (To-do lists, posts, etc.)
+      1 - Create model, on Terminal: rails g model Item name:string user:references
+      2 - Associate Users and Items in their models (has_many :items, belongs_to :user)
+      3 - Create Items_controller, on Terminal: rails g controller Items create
+      4 - In config/routes.rb, nest item resources underneath user resources:
+      ```
+      -     resources :users, only: [:update, :show]
+      +     resources :users, only: [:update, :show] do
+      +       resources :items, only: [:create]
+      +     end
+      ```
+      5 - Stub out actions in ItemsController:
+      ```
+            class ItemsController < ApplicationController
+              def create
+      +         @items = Item.new(item_params)
+      +         if @item save
+      +           flash[:notice] = "Succes! Item was saved!"
+      +           redirect_to @item
+      +         else
+      +           flash[:error] = "Oops! Something went wrong. The item was not saved. Please try again!"
+      +           redirect_to @user
+      +         end
+      +       end
+      +
+      +       # def index
+      +       #   @items = Item.all
+      +       # end
+      +
+      +       # def show
+      +       #   @item = Item.find(params[:id])
+      +       # end
+      +
+      +       # def newest
+      +       #   @item = Item.new
+      +       # end
+      +
+      +       private
+      +
+      +       def item_params
+      +         params.require(:item).permit(:name)
+      +       end
+      +
+            end
+      ```
+      6 - Create item partial for entering items, on Terminal: touch app/views/items/_ form.html.erb.
+      7 - in app/views/items/_ form.html.erb, add the following:
+      ```
+      <h1>New Item</h1>
+
+       <div class="row">
+         <div class="col-md-4">
+           <%= form_for [@user, Item.new] do |f| %>
+             <div class="form-group">
+               <%= f.label :name %>
+               <%= f.text_field :name, class: 'form-control', placeholder: "Enter item that needs to be done" %>
+             </div>
+             <div class="form-group">
+               <%= f.submit "Save", class: 'btn btn-success' %>
+             </div>
+           <% end %>
+         </div>
+       </div>
+      ```
+      8 - Create item partial for displaying items, on Terminal: touch app/views/items/_ item.html.erb.
+      9 - in app/views/items/_ item.html.erb, add the following:
+      10 - Add render syntax for the _ form and _ item partials (and items.count) in user#show:
+      ```
+                  <div class="media-body">
+                    <h2 class="media-heading"><%= @user.name %></h2>
+      +             <h3><%= pluralize(@user.items.count, 'item')%></h3>
+                    <small>
+                      <ol>
+      +                 <li><%= render partial: 'items/form', collection: @items %></li>
+                      </ol>
+                      </small>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+      ```
+      9 - Make sure to update migrations, on Terminal: rake db:migrate
 
 
 

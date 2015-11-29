@@ -1,0 +1,11 @@
+<div class="js-comments">
+<% if current_user %>
+  <%= form_for [@user, Item.new], remote: true do |f| %>
+    <%= f.label :name %>
+    <%= f.text_field :name, class: 'form-control', placeholder: "Enter item that needs to be done" %>
+    <div class="form-group">
+      <%= f.submit "Save", class: 'btn btn-success' %>
+    </div>
+  <% end %>
+<% end %>
+</div>

@@ -1,0 +1,4 @@
+<%= content_tag :div, class: 'media', id: "item-#{item.id}" do %>
+<h5><%= item.name %></h5>
+(created <%= time_ago_in_words(item.created_at) %> ago)
+<% end %>
