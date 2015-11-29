@@ -1,5 +1,14 @@
 source 'https://rubygems.org'
 
+# for storing images
+gem 'fog'
+# for uploading images
+gem 'carrierwave'
+gem 'mini_magick'
+# for creating stroger dummy dependencies to allow testing
+gem 'capybara'
+# for creating dummy dependencies to allow testing
+gem 'factory_girl_rails', '~> 4.0'
 # for authenticating users
 gem 'devise'
 # for Sendgrid password and username security
