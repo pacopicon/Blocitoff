@@ -1,8 +1,8 @@
-<div class="js-comments">
+<div class="js-items">
 <% if current_user %>
   <%= form_for [@user, Item.new], remote: true do |f| %>
     <%= f.text_field :name, placeholder: "Enter item to be done" %>
     <%= f.submit "Save item", class: 'btn btn-success' %>
-  <% end %> 
+  <% end %>
 <% end %>
 </div>

@@ -3,6 +3,7 @@ class ItemsController < ApplicationController
   def destroy
     @user = User.find(params[:user_id])
     @item = @user.items.find(params[:id])
+    authorize @item
 
     if @item.destroy
       flash[:notice] = "The item was obliterated!"
@@ -23,6 +24,8 @@ end
     @item = Item.new(item_params)
     @item.user = current_user
     @new_item = Item.new
+
+    authorize @item 
 
     if @item.save
       flash[:notice] = "Success! Item was saved!"

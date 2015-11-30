@@ -1,5 +1,9 @@
 source 'https://rubygems.org'
 
+# for authorization
+gem 'pundit'
+# for seeding database with dummy data
+gem 'faker'
 # for storing images
 gem 'fog'
 # for uploading images

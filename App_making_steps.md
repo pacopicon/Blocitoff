@@ -549,82 +549,134 @@ Steps to making a Ruby on Rails App
       ```
       -     resources :users, only: [:update, :show]
       +     resources :users, only: [:update, :show] do
-      +       resources :items, only: [:create]
+      +       resources :items, only: [:create, :destroy]
       +     end
       ```
-      5 - Stub out actions in ItemsController:
+      5 - Stub out create and destroy actions in ItemsController and include javascript rendition methods:
       ```
-            class ItemsController < ApplicationController
-              def create
-      +         @items = Item.new(item_params)
-      +         if @item save
-      +           flash[:notice] = "Succes! Item was saved!"
-      +           redirect_to @item
-      +         else
-      +           flash[:error] = "Oops! Something went wrong. The item was not saved. Please try again!"
-      +           redirect_to @user
-      +         end
-      +       end
-      +
-      +       # def index
-      +       #   @items = Item.all
-      +       # end
-      +
-      +       # def show
-      +       #   @item = Item.find(params[:id])
-      +       # end
-      +
-      +       # def newest
-      +       #   @item = Item.new
-      +       # end
-      +
-      +       private
-      +
-      +       def item_params
-      +         params.require(:item).permit(:name)
-      +       end
-      +
+      class ItemsController < ApplicationController
+
+        def destroy
+          @user = User.find(params[:user_id])
+          @item = @user.items.find(params[:id])
+
+          if @item.destroy
+            flash[:notice] = "The item was obliterated!"
+          else
+            flash[:notice] = "Oops!, the item could not be deleted.  Try again!"
+          end
+
+        respond_to do |format|
+          format.html
+          format.js
+        end
+      end
+
+        def create
+          @user = User.find(params[:user_id])
+          @items = @user.items
+
+          @item = Item.new(item_params)
+          @item.user = current_user
+          @new_item = Item.new
+
+          if @item.save
+            flash[:notice] = "Success! Item was saved!"
+          else
+            flash[:error] = "Oops! Something went wrong. The item was not saved. Please try again!"
+          end
+
+          respond_to do |format|
+            format.html
+            format.js
+          end
+        end
+
+        private
+
+        def item_params
+          params.require(:item).permit(:name)
+        end
+
+      end
+      ```
+      6 - Allow items to be displayed in User#show by instantiating item in User controller:
+      ```
+            def show
+                @user = User.find(params[:id])
+      +         @items = @user.items
             end
       ```
-      6 - Create item partial for entering items, on Terminal: touch app/views/items/_ form.html.erb.
-      7 - in app/views/items/_ form.html.erb, add the following:
+      7 - Create item partial for entering items, on Terminal: touch app/views/items/_ form.html.erb.
+      8 - in app/views/items/_ form.html.erb, add the following:
       ```
-      <h1>New Item</h1>
-
-       <div class="row">
-         <div class="col-md-4">
-           <%= form_for [@user, Item.new] do |f| %>
-             <div class="form-group">
-               <%= f.label :name %>
-               <%= f.text_field :name, class: 'form-control', placeholder: "Enter item that needs to be done" %>
-             </div>
-             <div class="form-group">
-               <%= f.submit "Save", class: 'btn btn-success' %>
-             </div>
-           <% end %>
-         </div>
-       </div>
+      <div class="js-items">
+      <% if current_user %>
+        <%= form_for [@user, Item.new], remote: true do |f| %>
+          <%= f.text_field :name, placeholder: "Enter item to be done" %>
+          <%= f.submit "Save item", class: 'btn btn-success' %>
+        <% end %>
+      <% end %>
+      </div>
       ```
-      8 - Create item partial for displaying items, on Terminal: touch app/views/items/_ item.html.erb.
-      9 - in app/views/items/_ item.html.erb, add the following:
-      
-      10 - Add render syntax for the _ form and _ item partials (and items.count) in user#show:
+      9 - Create item partial for displaying items, on Terminal: touch app/views/items/_ item.html.erb.
+      10 - in app/views/items/_ item.html.erb, add the following:
       ```
-                  <div class="media-body">
-                    <h2 class="media-heading"><%= @user.name %></h2>
-      +             <h3><%= pluralize(@user.items.count, 'item')%></h3>
-                    <small>
-                      <ol>
-      +                 <li><%= render partial: 'items/form', collection: @items %></li>
-                      </ol>
-                      </small>
-                  </div>
-                </div>
-              </div>
-            </div>
+      <%= content_tag :div, class: 'media', id: "item-#{item.id}" do %>
+      <small><%= item.name %> (created <%= time_ago_in_words(item.created_at) %> ago) | <%= link_to "Delete", [item.user, item], method: :delete, remote: true %></small>
+      <% end %>
 
       ```
-      9 - Make sure to update migrations, on Terminal: rake db:migrate
+      11 - Add render syntax for the _ form and _ item partials (and items.count) in user#show:
+      ```
+            <div class="media-body">
+              <h2 class="media-heading"><%= @user.name %>'s to do list:</h2>
+      +       <div class='js-items-count'>
+      +         <%= pluralize(@user.items.count, 'item')%> to complete:
+      +       </div>
+      +       <small>
+      +         <ul>
+      +           <li class="js-items">
+      +             <%= render partial: 'items/item', collection: @items %>
+      +           </li>
+      +         </ul>
+      +       <div class="new-item">
+      +         <%= render partial: 'items/form', locals: {item: @item, comment: @user.items.new}%>
+      +       </div>
+      +       </small>
+      +     </div>
+      +   </div>
+      + </div>
+      +</div>
+      ```
+      12 - Create javascript helpers to 'Ajaxify' the creation and destuction of items, touch 'create.js.erb' and 'destroy.js.erb' files within app/views/items.
+      13 - In app/views/items/create.js.erb add:
+      ```
+      <% if @item.valid? %>
+      $('.js-items').append("<%= escape_javascript(render(@item)) %>");
+      $('.new-item').html("<%= escape_javascript(render partial: 'items/form', locals: {user: @user, item: @new_item}) %>");
+      $('.js-items-count').html("<%= pluralize(@item.user.items.count, 'item') %> to complete:");
+      <% else %>
+      $('.new-item').html("<%= escape_javascript(render partial: 'items/form', locals: {user: @user, item: @item}) %>");
+      <% end %>
+      ```
+      14 - In app/views/items/destroy.js.erb add:
+      ```
+      <% if @item.destroyed? %>
+      $('#item-' +<%= @item.id %>).fadeOut('slow');
+      $('.js-items-count').html("<%= pluralize(@item.user.items.count, 'item') %> to complete:");
+      <% else %>
+      $('#item-' +<%= @item.id %>).prepend("<div class='alert-danger'><%= flash[:error] %></div>");
+      <% end %>
+      ```
+      15 - Make sure to update migrations, on Terminal: rake db:migrate
+(IX) - Seeding data
+      1 - In Gemfile: ```+ gem 'faker'```
+      2 - On Terminal: bundle
+      3 - In db/seeds.rb:
+      ```
+      ```
+
 
 
 

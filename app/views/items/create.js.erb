@@ -1,6 +1,7 @@
 <% if @item.valid? %>
 $('.js-items').append("<%= escape_javascript(render(@item)) %>");
-$('.new-comment').html("<%= escape_javascript(render partial: 'items/form', locals: {user: @user, item: @new_item}) %>");
+$('.new-item').html("<%= escape_javascript(render partial: 'items/form', locals: {user: @user, item: @new_item}) %>");
+$('.js-items-count').html("<%= pluralize(@item.user.items.count, 'item') %> to complete:");
 <% else %>
 $('.new-item').html("<%= escape_javascript(render partial: 'items/form', locals: {user: @user, item: @item}) %>");
 <% end %>
