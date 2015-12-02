@@ -37,16 +37,12 @@
         <div class='js-items-count'>
           <%= pluralize(@user.items.count, 'item')%> to complete:
         </div>
-        <small>
-          <ul>
-            <li class="js-items">
-              <%= render partial: 'items/item', collection: @items %>
-            </li>
-          </ul>
+        <div class="js-items">
+          <%= render partial: 'items/item', collection: @items %>
+        </div>
         <div class="new-item">
           <%= render partial: 'items/form', locals: {item: @item}%>
         </div>
-        </small>
       </div>
     </div>
   </div>
