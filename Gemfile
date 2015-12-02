@@ -27,6 +27,9 @@ end
 
 group :development do
   gem 'sqlite3'
+  # for logging better errors
+  gem 'binding_of_caller'
+  gem 'better_errors'
 end
 
 # Bootstrap

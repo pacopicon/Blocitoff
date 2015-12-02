@@ -1,9 +1,17 @@
 class ItemsController < ApplicationController
 
+  def show
+    @item = current_user.items.find(params[:id])
+    @items = current_user.items
+
+    respond_to do |format|
+      format.html
+      format.js
+    end
+  end
+
   def destroy
-    @user = User.find(params[:user_id])
-    @item = @user.items.find(params[:id])
-    authorize @item
+    @item = current_user.items.find(params[:id])
 
     if @item.destroy
       flash[:notice] = "The item was obliterated!"
@@ -25,8 +33,6 @@ end
     @item.user = current_user
     @new_item = Item.new
 
-    authorize @item 
-
     if @item.save
       flash[:notice] = "Success! Item was saved!"
     else
@@ -42,7 +48,7 @@ end
   private
 
   def item_params
-    params.require(:item).permit(:name)
+    params.require(:item).permit(:name, :completed)
   end
 
 end

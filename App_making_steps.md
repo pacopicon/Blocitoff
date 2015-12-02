@@ -677,6 +677,8 @@ Steps to making a Ruby on Rails App
       ```
       ```
 
+      partial: 'items/item', collection: @items %>
+
 
 
 
