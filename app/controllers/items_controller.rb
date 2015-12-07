@@ -26,11 +26,8 @@ class ItemsController < ApplicationController
 end
 
   def create
-    @user = User.find(params[:user_id])
-    @items = @user.items
-
-    @item = Item.new(item_params)
-    @item.user = current_user
+    @user = current_user
+    @item = current_user.items.build(item_params)
     @new_item = Item.new
 
     if @item.save
