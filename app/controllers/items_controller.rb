@@ -1,6 +1,7 @@
 class ItemsController < ApplicationController
 
   def show
+    @user = current_user
     @item = current_user.items.find(params[:id])
     @items = current_user.items
 

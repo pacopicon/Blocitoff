@@ -1,5 +1,7 @@
 source 'https://rubygems.org'
 
+# for allowing cron jobs
+gem 'whenever'
 # for authorization
 gem 'pundit'
 # for seeding database with dummy data
