@@ -41,7 +41,7 @@
           <%= render partial: 'items/item', collection: @items %>
         </div>
         <div class="new-item">
-          <%= render partial: 'items/form', locals: {item: @item}%>
+          <%= render partial: 'items/form', locals: {user: @user, item: @item}%>
         </div>
       </div>
     </div>
