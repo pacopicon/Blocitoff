@@ -23,13 +23,6 @@ ActiveRecord::Schema.define(version: 20151130003937) do
 
   add_index "items", ["user_id"], name: "index_items_on_user_id"
 
-  create_table "lists", force: :cascade do |t|
-    t.string   "title"
-    t.text     "body"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
   create_table "users", force: :cascade do |t|
     t.string   "name"
     t.string   "email",                  default: "", null: false

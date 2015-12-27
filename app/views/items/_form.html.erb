@@ -1,8 +1,10 @@
+<script src= "https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 <div class="js-items">
 <% if user %>
   <%= form_for [user, Item.new], remote: true do |f| %>
     <%= f.text_field :name, placeholder: "Enter item to be done" %>
     <%= f.submit "Save item", class: 'btn btn-success' %>
+    <%= javascript_include_tag 'http://localhost:3000/item_create.js'%>
   <% end %>
 <% end %>
 </div>
