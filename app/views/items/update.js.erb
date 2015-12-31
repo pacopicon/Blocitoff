@@ -1,0 +1,6 @@
+<% if @item.valid? %>
+$('.js-items').append("<%= escape_javascript(render(@item)) %>");
+$('.new-item').html("<%= escape_javascript(render partial: 'items/form', locals: {user: @user, item: @item}) %>");
+<% else %>
+$('.new-item').html("<%= escape_javascript(render partial: 'items/form', locals: {user: @user, item: @item}) %>");
+<% end %>

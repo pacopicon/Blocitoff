@@ -1,7 +1,0 @@
-<% if @item.valid? %>
-$('.js-unchecked').append("<%= escape_javascript(render(@item)) %>");
-$('.new-item').html("<%= escape_javascript(render partial: 'items/form', locals: {user: @user, item: @new_item}) %>");
-$('.new-item').append("<%= link_to "", item, class: 'glyphicon glyphicon-check', method: :delete, remote: true %>");
-<% else %>
-$('.new-item').html("<%= escape_javascript(render partial: 'items/form', locals: {user: @user, item: @item}) %>");
-<% end %>

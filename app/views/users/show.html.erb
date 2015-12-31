@@ -33,15 +33,15 @@
         </div>
       <% end %>
       <div class="media-body">
-        <h2 class="media-heading"><%= @user.name %>'s to do list:</h2>
+        <h2 class="media-heading">
         <div class='js-items-count'>
-          <%= pluralize(@user.items.count, 'item')%> to complete:
+          <%= @user.name %>'s to do list.  Items to complete: <%= pluralize(@user.items.count, 'item')%></h2>
         </div>
         <div class="js-items">
           <%= render partial: 'items/item', collection: @items %>
         </div>
         <div class="new-item">
-          <%= render partial: 'items/form', locals: {user: @user, item: @item}%>
+          <%= render partial: 'items/form', locals: {user: @user, item: @item} %>
         </div>
       </div>
     </div>

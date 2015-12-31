@@ -43,10 +43,24 @@ end
     end
   end
 
+  def update
+    @item = Item.find(params[:id])
+    if @item.update_attributes(item_params)
+      flash[:notice] = "item has been updated."
+    else
+      flash[:error] = "There was an error pdating the item. Please try again!"
+    end
+
+    respond_to do |format|
+      format.html
+      format.js
+    end
+  end
+
   private
 
   def item_params
-    params.require(:item).permit(:name, :completed)
+    params.require(:item).permit(:name, :completed, :due_date, :time_est, :importance, :rank)
   end
 
 end
