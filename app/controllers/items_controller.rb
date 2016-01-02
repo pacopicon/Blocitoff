@@ -60,7 +60,7 @@ end
   private
 
   def item_params
-    params.require(:item).permit(:name, :completed, :due_date, :time_est, :importance, :rank)
+    params.require(:item).permit(:name, :completed, :due_date, :time_est, :importance)
   end
 
 end

@@ -21,12 +21,12 @@ users = User.all
  # The `save` method then saves this User to the database.
 
 # Create Items
-100.times do
-  Item.create!(
-  user: users.sample,
-  name: Faker::Lorem.sentence
-  )
-end
+# 100.times do
+#   Item.create!(
+#   user: users.sample,
+#   name: Faker::Lorem.sentence
+#   )
+# end
 
 user = User.first
 user.skip_reconfirmation!

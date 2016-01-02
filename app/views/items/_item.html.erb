@@ -1,5 +1,5 @@
 <%= content_tag :div, class: 'media', id: "item-#{item.id}" do %>
-  <div><h4><%= item.name %></h4> | due on: <%= item.due_date.strftime('%A')%>, <%= item.due_date.strftime('%B')%> <%= item.due_date.strftime('%-d')%>, <%= item.due_date.strftime('%Y')%> <%= item.due_date.strftime("at %I:%M%p")%> | to-do item will take <%= item.time_est.strftime("%H hours and %M minutes") %> to complete | importance: <%= item.importance %>
+  <div><h4><%= item.name %></h4> | due on: <%= item.due_date.strftime('%A')%>, <%= item.due_date.strftime('%B')%> <%= item.due_date.strftime('%-d')%>, <%= item.due_date.strftime('%Y')%> <%= item.due_date.strftime("at %I:%M%p")%> | to-do item will take <%= item.time_est.strftime("%H hours and %M minutes") %> to complete | importance: <%= item.importance %> | rank: <%= item.rank %>
     <%= form_for [item.user, item] do |f| %>
     <%= f.check_box :completed %>
     <%= f.submit "<--completed", class: 'btn btn-danger btn-xs' %></div>

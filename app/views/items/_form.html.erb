@@ -13,25 +13,26 @@
         <label for="itemName" class="col-sm-3 control-label">How important is it?</label>
         <label class="checkbox-inline">
           <div class="col-sm-12">
-              <%= f.radio_button :importance, 1 %> not important at all
+              <%= f.radio_button :importance, "not important at all" %> not important at all
             </label>
             <label class="checkbox-inline">
-              <%= f.radio_button :importance, 2 %> of trivial importance
+              <%= f.radio_button :importance, "of trivial importance" %> of trivial importance
             </label>
             <label class="checkbox-inline">
-              <%= f.radio_button :importance, 3 %> important
+              <%= f.radio_button :importance, "important" %> important
             </label>
             <label class="checkbox-inline">
-              <%= f.radio_button :importance, 4 %> pretty important
+              <%= f.radio_button :importance, "pretty important" %> pretty important
             </label>
             <label class="checkbox-inline">
-              <%= f.radio_button :importance, 5 %> I'll get fired if I don't do this
+              <%= f.radio_button :importance, "I'll get fired if I don't do this" %> I'll get fired if I don't do this
           </div>
         </label>
       </div>
       <div class="form-group">
         <label for="itemName" class="col-sm-3 control-label">By when do you have to do it?</label>
         <div class="col-sm-6.5">
+          <% right_now = DateTime.now %>
           <%= f.datetime_select :due_date, minute_step: 15, ampm: true, start_year: DateTime.now.strftime('%Y').to_i, end_year: (Time.now +  31449600).strftime('%Y').to_i %>
         </div>
       </div>
