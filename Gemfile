@@ -1,5 +1,8 @@
 source 'https://rubygems.org'
 
+# to allow graph functionality
+gem 'chartkick'
+
 # for allowing cron jobs
 gem 'whenever'
 # for authorization

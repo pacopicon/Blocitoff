@@ -1,3 +1,4 @@
+<%= javascript_include_tag "//www.google.com/jsapi", "chartkick" %>
 <div class="row">
   <div class="col-md-12">
     <div class="media">
@@ -35,7 +36,9 @@
       <div class="media-body">
         <h2 class="media-heading">
         <div class='js-items-count'>
-          <%= @user.name %>'s to do list.  Items to complete: <%= pluralize(@user.items.count, 'item')%></h2>
+          <%= @user.name %>'s to do list. <%= pluralize(@user.items.count, 'item')%> to complete: </h2>
+f
+          <%= pie_chart Item.group(:completed).count %>
         </div>
         <div class="js-items">
           <%= render partial: 'items/item', collection: @items %>
