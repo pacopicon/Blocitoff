@@ -1,0 +1,11 @@
+  <small><%= @item.name %> (created <%= time_ago_in_words(item.created_at) %> ago)
+
+  <%= form_for item do |f| %>
+    <%= f.label :completed, class: 'checkbox' do %>
+      <%= f.check_box :completed %>
+    <% end %>
+  <% end %>
+
+  <% if item.completed %>
+    <%= link_to "", [item.user, item], method: :delete, class: 'glyphicon glyphicon-ok', remote: true %></small>
+  <% end %>

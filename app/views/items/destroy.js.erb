@@ -1,6 +1,6 @@
 <% if @item.destroyed? %>
 $('#item-' +<%= @item.id %>).fadeOut('slow');
-$('.js-comments-count').html("<%= pluralize(@item.user.items.count, 'item') %>");
+$('.js-items-count').html("<%= pluralize(@item.user.items.count, 'item') %> to complete:");
 <% else %>
 $('#item-' +<%= @item.id %>).prepend("<div class='alert-danger'><%= flash[:error] %></div>");
 <% end %>

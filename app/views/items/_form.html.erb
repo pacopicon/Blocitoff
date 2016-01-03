@@ -1,8 +1,52 @@
-<div class="js-comments">
-<% if current_user %>
-  <%= form_for [@user, Item.new], remote: true do |f| %>
-    <%= f.text_field :name, placeholder: "Enter item to be done" %>
-    <%= f.submit "Save item", class: 'btn btn-success' %>
-  <% end %> 
+<script src= "https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<div class="js-items">
+<% if user %>
+  <%= form_for [user, Item.new], remote: true do |f| %>
+    <form class="form-horizontal">
+      <div class="form-group">
+        <label for="itemName" class="col-sm-3 control-label">What do you need to do?</label>
+        <div class="col-sm-9">
+          <%= f.text_field :name, placeholder: "to-do item", class: "form-control" %>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="itemName" class="col-sm-3 control-label">How important is it?</label>
+        <label class="checkbox-inline">
+          <div class="col-sm-12">
+              <%= f.radio_button :importance, "not important at all" %> not important at all
+            </label>
+            <label class="checkbox-inline">
+              <%= f.radio_button :importance, "of trivial importance" %> of trivial importance
+            </label>
+            <label class="checkbox-inline">
+              <%= f.radio_button :importance, "important" %> important
+            </label>
+            <label class="checkbox-inline">
+              <%= f.radio_button :importance, "pretty important" %> pretty important
+            </label>
+            <label class="checkbox-inline">
+              <%= f.radio_button :importance, "I'll get fired if I don't do this" %> I'll get fired if I don't do this
+          </div>
+        </label>
+      </div>
+      <div class="form-group">
+        <label for="itemName" class="col-sm-3 control-label">By when do you have to do it?</label>
+        <div class="col-sm-6.5">
+          <% right_now = DateTime.now %>
+          <%= f.datetime_select :due_date, minute_step: 15, ampm: true, start_year: DateTime.now.strftime('%Y').to_i, end_year: (Time.now +  31449600).strftime('%Y').to_i %>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="itemName" class="col-sm-3 control-label">How long will it take you to do it?</label>
+        <div class="col-sm-6.5">
+          <%= f.time_select :time_est, prompt: {hour: 'Choose hours', minute: 'Choose minutes'}, minute_step: 5, end_hour: 6 %>
+        </div>
+      </div>
+      <div class="form-group">
+        <%= f.submit "Save item", class: 'btn btn-success' %>
+      </div>
+  </form>
+    <%= javascript_include_tag 'http://localhost:3000/item_create.js'%>
+  <% end %>
 <% end %>
 </div>

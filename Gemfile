@@ -1,5 +1,14 @@
 source 'https://rubygems.org'
 
+# to allow graph functionality
+gem 'chartkick'
+
+# for allowing cron jobs
+gem 'whenever'
+# for authorization
+gem 'pundit'
+# for seeding database with dummy data
+gem 'faker'
 # for storing images
 gem 'fog'
 # for uploading images
@@ -23,6 +32,9 @@ end
 
 group :development do
   gem 'sqlite3'
+  # for logging better errors
+  gem 'binding_of_caller'
+  gem 'better_errors'
 end
 
 # Bootstrap

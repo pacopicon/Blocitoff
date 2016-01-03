@@ -7,8 +7,10 @@ Rails.application.routes.draw do
   devise_for :users # Order of routes matters (put this one before resources: users)
 
   resources :users, only: [:update, :show] do
-    resources :items, only: [:create, :destroy]
+    resources :items, only: [:create, :destroy, :update]
   end
+
+  resources :items, only: [:edit]
 
 
 
